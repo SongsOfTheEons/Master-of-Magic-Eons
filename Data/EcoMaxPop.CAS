@@ -1,0 +1,51 @@
+: INPUT - CityID - the city being calculated
+		  TERRAINMP - base Maximal Population from terrain in 1/4 units of maxpop.
+  OUTPUT - MP - the calcualted Maximal Population.
+:
+
+MP=TERRAINMP;
+
+W=CITYOWNER(CityID);
+
+
+MP=%I(MP/4);
+
+MULTIPLIER = 1;
+
+: Effect of multiplier buildings is applied before so as to only influence base maxpop :
+If ISBUILT(CityID,BBathHouse) THEN { 
+	MULTIPLIER = MULTIPLIER + 0.2;
+}
+
+If ISBUILT(CityID,BWaterWorks) THEN { 
+	MULTIPLIER = MULTIPLIER + 0.25
+}
+
+IF RETORT(W,Omniscient) THEN {
+	IF BOOKS(W,Nature)>0 THEN {
+		MULTIPLIER = MULTIPLIER + (0.085+(BOOKS(W,Nature)*0.015));
+	}
+}
+
+IF RETORT(W,Guardian) THEN {
+	IF CITYRACE(CityID)=HOMERACE(W) THEN { 
+		MULTIPLIER = MULTIPLIER + 0.25
+		MP=MP+2; 
+	}
+}
+
+MP = MP * MULTIPLIER;
+
+If ISBUILT(CityID,BGranary) THEN { 
+	MP=MP+3; 
+}
+
+IF CITYENCHANT(CityID,CEDrought)>-1 THEN { 
+	MP=MP-6; 
+}
+
+IF CITYENCHANT(CityID,CEAbundance)>-1 THEN {
+	MP = MP + 6;
+}
+
+  
