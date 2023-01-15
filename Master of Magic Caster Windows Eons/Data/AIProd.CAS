@@ -199,7 +199,7 @@ IF RACE=RCGnoll THEN { UPRIO=UPRIO+5; }
 IF RACE=RCBarbarian THEN { UPRIO=UPRIO+8; }
 }
 
-IF ISBUILT(C,BArmorerGuild) THEN {
+IF ISBUILT(C,BOfficerQuarter) THEN {
 UPRIO=UPRIO+6;
 }
 IF ISBUILT(C,BFantasticStables) THEN {

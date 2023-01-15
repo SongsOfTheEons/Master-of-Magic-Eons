@@ -26,7 +26,7 @@ Call "EXPPrio";
 if CITYENCHANT(c,CEEvilPresence)>-1 then { Prio=PRIO-15; }
 }
 
-if (j=BOracle) %and (CITYENCHANT(c,CEEvilPresence)=-1) then { Call "UnrestPrio"; }
+if (CITYENCHANT(c,CEEvilPresence)=-1) then { Call "UnrestPrio"; }
 
 if (j=BColosseum) then {
 Call "EconomyPrio";
@@ -35,7 +35,7 @@ if Objective(W)=Narcissist then { PRIO=PRIO-4; }
 }
 
 if (j=BMaritimeGuild) %OR (J=BStables) %OR (J=BFantasticStables)
-%OR (J=BArmorerGuild) %OR (J=BFighterGuild) THEN { Call "MilitaryPrio"; }
+%OR (J=BOfficerQuarter) %OR (J=BFighterGuild) THEN { Call "MilitaryPrio"; }
 
 if ((j=BFantasticStables) %OR (j=BMaritimeGuild))
 	%AND (Objective(W)=Expansionist) then { PRIO=PRIO+6; }
@@ -89,18 +89,11 @@ CALL "PowerPrio";
 if MAGICIANSAVAILABLE then { CALL "MilitaryPrio"; }
 }
 
-if  (j=BCathedral) %OR (J=BParthenon) %OR (J=BShrine) THEN {
+if  (j=BCathedral) %OR (J=BTemple) %OR (J=BShrine) THEN {
 IF CITYENCHANT(C,CEEvilPresence)>-1 THEN { PRIO=PRIO-10; }
 CALL "UnrestPrio";
 CALL "PowerPrio";
 CALL "ReligionPrio";
-}
-
-if j=BAmplifyingTower then {
-if OVERLANDTURN()<(84-(7*Difficulty())) then {PRIO=-100; HALT; }
-if OVERLANDTURN()<(150-(10*Difficulty())) then {PRIO=PRIO-(14-Difficulty()-(%I(OVERLANDTURN()/10))); }
-CALL "Research2Prio";
-CALL "Amplifier";
 }
 
 if j=BMonument then {
