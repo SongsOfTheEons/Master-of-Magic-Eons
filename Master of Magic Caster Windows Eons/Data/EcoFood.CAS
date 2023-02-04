@@ -24,7 +24,7 @@ ADDRESLINE "Overfarming",FOOD-OF;
 }
 }
 
-IF ISBUILT(CityID,BForesterGuild) THEN {
+IF ISBUILT(CityID,BForesterHall) THEN {
 ADDRESLINE "Forester's Guild", 6;
 }
 

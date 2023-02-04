@@ -5,72 +5,157 @@
   Output - None. 
   Use the AddResLine command to add production to the total and as an individual line in the detailed view on the UI.
 		:
-ADDRESLINE "Workers", (2*WORKERS);
 
+BASEPROD = 0;
+:Add Urban Worker value first:
+UWorkers = (2*WORKERS);
+
+:Now Check for Racial bonuses:
 RACE=CITYRACE(CITYID);
 IF RACE=RCDwarf THEN {
-ADDRESLINE "Dwarven Workers", WORKERS;
+	UWorkers = UWorkers + WORKERS;
 }
 IF RACE=RCKlackon THEN {
-ADDRESLINE "Klackon Workers", WORKERS;
+	UWorkers = UWorkers + WORKERS;
+}
+BASEPROD = BASEPROD + UWorkers;
+ADDRESLINE "Urban Workers", %I(UWorkers);
+IF ISBUILT(CITYID,BManufactory) THEN {
+	ManuProd = WORKERS * 1.5;
+	BASEPROD = BASEPROD + ManuProd;
+	ADDRESLINE "Manufactory", %I(ManuProd); 
 }
 
-I=%I((FARMERS+1)/2);
-ADDRESLINE "Farmers",I;
+:Add Rural Worker Production:
+RProd = (FARMERS+1)/2;
+BASEPROD=BASEPROD + RProd;
 
-If ISBUILT(CITYID,BSawmill) THEN {
-ADDRESLINE "Sawmill",6;
-}
+ADDRESLINE "Rural Workers",%I(RProd);
 
-If ISBUILT(CITYID,BStables) THEN {
-ADDRESLINE "Stables",2;
-}
-
-BASEPROD=SUMRESLINES();
+:BASEPROD=SUMRESLINES();:
 
 IF CITYENCHANT(CITYID,CEDrought)=-1 THEN {
 
-PPTOTAL=PRODPER*2;
-
 W=CITYOWNER(CITYID);
 
-IF RETORT(W,Omniscient) THEN {
- IF BOOKS(W,Death)>0 THEN {
- PP=((BOOKS(W,Death)-1)*7)+32;
- ADDRESLINE "Omniscient", %I((BASEPROD * PP) /200);
- PPTOTAL=PPTOTAL + PP;
- }
+
+:Flat Production bonuses:
+
+minerProd=0;
+IF ISBUILT(CITYID,BMinerGuild) THEN {
+	IF (FARMERS < 8) THEN {
+		minerProd = 0.5 * FARMERS;
+	}
+	ELSE {
+		minerProd = 4;
+	}
+	BASEPROD = BASEPROD + minerProd;
+	ADDRESLINE "Miner's Guild",%I(minerProd);
 }
 
-If ISBUILT(CITYID,BForesterGuild) THEN {
-ADDRESLINE "Forester's Guild",%I((BASEPROD * 10) /100);
-PPTOTAL=PPTOTAL + 20;
+sawmillProd = 0;
+If ISBUILT(CITYID,BSawmill) THEN {
+	IF (WORKERS < 6) THEN {
+		sawmillProd = 1 * WORKERS;
+	}
+	ELSE {
+		sawmillProd = 8;
+	}
+	ADDRESLINE "Sawmill",%I(sawmillProd);
+	BASEPROD = BASEPROD + sawmillProd;
 }
 
-If ISBUILT(CITYID,BMinerGuild) THEN {
-ADDRESLINE "Miner's Guild",%I((BASEPROD * 25) /100);
-PPTOTAL=PPTOTAL + 50;
+FHProd = 2;
+If ISBUILT(CITYID,BForesterHall) THEN {
+	IF (FARMERS < 6) THEN {
+		FHProd = 0.5 * FARMERS;
+	}
+	ELSE {
+		FHProd = 3;
+	}
+	ADDRESLINE "Forester Hall",%I(FHProd);
+	BASEPROD = BASEPROD + FHProd;
+}
+
+BSProd = 2;
+If ISBUILT(CITYID,BBlacksmith) THEN {
+	IF (WORKERS >= 1) THEN {
+		BSProd = 2;
+	}
+	ADDRESLINE "Blacksmith",%I(BSProd);
+	BASEPROD = BASEPROD + BSProd;
+}
+
+
+
+
+:Multiplier Production bonuses:
+
+prodMult = 1; :Tracks Total Prod Multiplier:
+multTally = 0; :Tracks value added by Multiplier:
+
+If ISBUILT(CITYID,BStables) THEN {
+	buildMult = 0.1;
+	prodMult = prodMult + buildMult;
+	buildValue = buildMult * BASEPROD;
+	multTally = multTally + buildValue
+	ADDRESLINE "Stables",%I(buildValue);
 }
 
 If ISBUILT(CITYID,BMechaGuild) THEN {
-ADDRESLINE "Mechanician's Guild",%I((BASEPROD * 35) /100);
-PPTOTAL=PPTOTAL + 70;
+	buildMult = 0.15;
+	prodMult = prodMult + buildMult;
+	buildValue = buildMult * BASEPROD;
+	multTally = multTally + buildValue
+	ADDRESLINE "Mechanician's Guild",%I(buildValue);
 }
 
+If ISBUILT(CITYID,BMagitekDiscrict) THEN {
+	buildMult = 0.1;
+	prodMult = prodMult + buildMult;
+	buildValue = buildMult * BASEPROD;
+	multTally = multTally + buildValue
+	ADDRESLINE "Magitek District",%I(buildValue);
+}
+	
 IF CITYENCHANT(CITYID,CEInspirations)>-1 THEN {
-ADDRESLINE "Inspiratons", BASEPROD;
-PPTOTAL=PPTOTAL + 200;
+	buildMult = 0.3;
+	prodMult = prodMult + buildMult;
+	buildValue = buildMult * BASEPROD;
+	multTally = multTally + buildValue
+	ADDRESLINE "Inspirations",%I(buildValue);
 }
 
-: Test enchantment Tower of Opression 
-IF CITYENCHANT(CITYID,28)>-1 THEN {
-ADDRESLINE "Tower of Oppression", %I (BASEPROD/2);
-PPTOTAL=PPTOTAL + 100;
+IF RETORT(W,Omniscient) THEN {
+	IF BOOKS(W,Death)>0 THEN {
+		buildMult = 0.06 + (BOOKS(W,Death) * 0.02; 
+		prodMult = prodMult + buildMult;
+		buildValue = buildMult * BASEPROD;
+		multTally = multTally + buildValue
+		ADDRESLINE "Inspirations",%I(buildValue);
+	}
 }
-:
+
+: Terrain Multiplier :
+
+buildMult = PRODPER / 100; 
+prodMult = prodMult + buildMult;
+buildValue = buildMult * BASEPROD;
+multTally = multTally + buildValue
+ADDRESLINE "Terrain Bonus",%I(buildValue);
+
+MISC = (BASEPROD + multTally )- SUMRESLINES()
+ADDRESLINE "Misc", %I(MISC);
+
+
 
 : Dump anything lost by fractions rounded down into the terrain modifier. :
+:
 TER=(%I((BASEPROD*(PPTOTAL+200))/200))-SUMRESLINES();
 
 ADDRESLINE "Terrain", TER;
 }
+
+
+
+:

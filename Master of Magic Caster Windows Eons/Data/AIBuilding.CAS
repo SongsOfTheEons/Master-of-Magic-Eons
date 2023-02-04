@@ -40,11 +40,11 @@ if (j=BMaritimeGuild) %OR (J=BStables) %OR (J=BFantasticStables)
 if ((j=BFantasticStables) %OR (j=BMaritimeGuild))
 	%AND (Objective(W)=Expansionist) then { PRIO=PRIO+6; }
 
-IF (J=BForesterGuild) %OR
+IF (J=BForesterHall) %OR
  (J=BFarmerMarket) %OR (j=BGranary) THEN { CALL "FoodPrio"; }
 
 if (j=BGranary) %and (Difficulty()>=DiffExpert) then { PRIO=PRIO+20; }
-if (j=BForesterGuild) %and (race=RCHighElf) then { CALL "MilitaryPrio";}
+if (j=BForesterHall) %and (race=RCHighElf) then { CALL "MilitaryPrio";}
 
 if (j=BShipYard) then {
   if (OVERLANDTURN()<20) then { PRIO=-100; HALT; }
